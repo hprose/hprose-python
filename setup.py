@@ -7,7 +7,7 @@ if sys.version_info < (2, 3):
 
 args = dict(
     name = 'hprose',
-    version = '1.4.2',
+    version = '1.4.3',
     description = 'Hprose is a High Performance Remote Object Service Engine.',
     long_description = open('README.md').read(),
     keywords = "hprose rpc serialize wsgi web service server development rest webservice json",
