@@ -13,15 +13,14 @@
 #                                                          #
 # hprose client for python 3.0+                            #
 #                                                          #
-# LastModified: Mar 8, 2015                                #
+# LastModified: Dec 2, 2016                                #
 # Author: Ma Bingyao <andot@hprose.com>                    #
 #                                                          #
 ############################################################
 
 import threading
-from io import BytesIO
 from sys import modules
-from hprose.io import HproseTags, HproseWriter, HproseReader
+from hprose.io import BytesIO, HproseTags, HproseWriter, HproseReader
 from hprose.common import HproseResultMode, HproseException
 
 class _Method(object):
@@ -57,11 +56,14 @@ class _AsyncInvoke(object):
     def __call__(self):
         try:
             result = self.__invoke(self.__name, self.__args, self.__byref, self.__resultMode, self.__simple)
-            argcount = self.__callback.func_code.co_argcount
-            if argcount == 0:
-                self.__callback()
-            elif argcount == 1:
-                self.__callback(result)
+            if hasattr(self.__callback, '__code__'):
+                argcount = self.__callback.__code__.co_argcount
+                if argcount == 0:
+                    self.__callback()
+                elif argcount == 1:
+                    self.__callback(result)
+                else:
+                    self.__callback(result, self.__args)
             else:
                 self.__callback(result, self.__args)
         except (KeyboardInterrupt, SystemExit):
