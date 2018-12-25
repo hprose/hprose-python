@@ -13,7 +13,7 @@
 #                                                          #
 # hprose httpclient for python 2.3+                        #
 #                                                          #
-# LastModified: Mar 8, 2015                                #
+# LastModified: Dec 25, 2018                               #
 # Author: Ma Bingyao <andot@hprose.com>                    #
 #                                                          #
 ############################################################
@@ -267,6 +267,7 @@ class HproseHttpClient(HproseClient):
         self.__path = None
         self.__query = None
         self.__fragment = None
+        self.__conn = None
         super(HproseHttpClient, self).__init__(uri)
 
     def setUri(self, uri):
@@ -361,6 +362,13 @@ class HproseHttpClient(HproseClient):
     else:
         __getconnect = __getconnect_new
 
+    def __getconn(self):
+        if not self.keepAlive:
+            return self.__getconnect()
+        if self.__conn == None:
+            self.__conn = self.__getconnect()
+        return self.__conn
+
     def _sendAndReceive(self, data):
         header = {'Content-Type': 'application/hprose'}
         header['Host'] = self.__host
@@ -375,7 +383,7 @@ class HproseHttpClient(HproseClient):
         else:
             header['Connection'] = 'close'
         for name in self.__header: header[name] = self.__header[name]
-        httpclient = self.__getconnect()
+        httpclient = self.__getconn()
         if self.__proxy == None:
             path = urlparse.urlunsplit(('', '', self.__path, self.__query, self.__fragment))
         else:
@@ -387,8 +395,10 @@ class HproseHttpClient(HproseClient):
             cookieList.extend(resp.getheader('set-cookie2', '').split(','))
             _setCookie(cookieList, self.__host)
             data = resp.read()
-            httpclient.close()
+            if not self.keepAlive:
+                httpclient.close()
             return data
         else:
-            httpclient.close()
+            if not self.keepAlive:
+                httpclient.close()
             raise HproseException, '%d:%s' % (resp.status, resp.reason)
