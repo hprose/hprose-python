@@ -26,6 +26,7 @@ from sys import modules
 from threading import RLock
 from uuid import UUID
 from hprose.common import HproseException
+import decimal
 
 Unicode = False
 
@@ -632,6 +633,7 @@ class HproseWriter(object):
         elif isinstance(v, bool): self.writeBoolean(v)
         elif isinstance(v, int): self.writeInteger(v)
         elif isinstance(v, float): self.writeDouble(v)
+        elif isinstance(v, decimal.Decimal): self.writeDouble(v)
         elif isinstance(v, long): self.writeLong(v)
         elif isinstance(v, str):
             if v == '':
