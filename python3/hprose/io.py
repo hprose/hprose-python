@@ -26,6 +26,7 @@ from sys import modules
 from threading import RLock
 from uuid import UUID
 from hprose.common import HproseException
+import decimal
 
 ZERO = datetime.timedelta(0)
 
@@ -627,6 +628,7 @@ class HproseWriter(object):
         elif isinstance(v, bool): self.writeBoolean(v)
         elif isinstance(v, int): self.writeInteger(v)
         elif isinstance(v, float): self.writeDouble(v)
+        elif isinstance(v, decimal.Decimal): self.writeDouble(v)
         elif isinstance(v, (bytes, bytearray, memoryview)): self.writeBytesWithRef(v)
         elif isinstance(v, str):
             if v == '':
